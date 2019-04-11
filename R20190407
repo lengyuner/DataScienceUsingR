@@ -1,0 +1,60 @@
+
+# read the data
+library('foreign')
+ad<-read.dta("MobileOrder.dta")
+nonad<-read.dta("OnlineOrder.dta")
+ad_mem<-read.dta("MobileMember.dta")
+nonad_mem<-read.dta('OnlineMember.dta')
+
+ad_mem$is<-1
+nonad_mem$is<-0
+ad$is<-1
+nonad$is<-0
+
+# ifelse function to select the needed data and give they a value
+ad$Mobile <- ifelse(ad$Mall == "03" & (ad$AccessRoute=="1000132495" | ad$AccessRoute =="1000132496" | ad$AccessRoute =="1000013091"),1,0)
+ad_mem$gender<-ifelse(ad_mem$Gender=='Z',0.5,ifelse(ad_mem$Gender=='F',0,1))
+t_birth<-as.numeric(as.character(ad_mem$Birth))
+ad_mem$birth<-ifelse(is.na(t_birth),1982,t_birth)
+ad_mem$interset<-ifelse(ad_mem$Interest=='ZZ',00,ad_mem$Interest)
+
+nonad_mem$gender<-ifelse(nonad_mem$Gender=='Z',0.5,ifelse(nonad_mem$Gender=='F',0,1))
+t2_birth<-as.numeric(as.character(nonad_mem$Birth))
+nonad_mem$birth<-ifelse(is.na(t2_birth),1982,t2_birth)
+nonad_mem$interset<-ifelse(nonad_mem$Interest=='ZZ',00,nonad_mem$Interest)
+
+
+# define a function to compute the distance of different users
+distance_d<-function(x,y)
+{
+    d1<-abs(x$gender-y$gender)/(2)
+    d2<-abs(x$birth-y$birth)/100
+    d3<-ifelse(x$interset==y$interset,0,1)
+    d4<-abs(x$SignUpDate-y$SignUpDate)/(max(ad_mem$SignUpDate)-min(ad_mem$SignUpDate))
+    d<-d1+d2+d3+d4#+d5
+}
+
+# compute the distance of all users
+# one to one match by the min distance 
+for(k1 in 1:30)
+{
+    new_nonad_mem<-subset(nonad_mem,selected==0)
+    for(k2 in 1:length(new_nonad_mem$birth))
+    {
+        dist[k2]<-distance_d(ad_mem[k1,],new_nonad_mem[k2,])
+    }
+    #k3<-which(dist,dist==min(dist))        
+    k3<-which.min(dist)
+    k4<-which(nonad_mem$MemberID==new_nonad_mem$MemberID[k3])
+    nonad_mem$selected[k4]<-1    
+    ad_mem$counterpart[k1]<-new_nonad_mem$MemberID[k3]    
+}
+
+
+
+
+
+
+
+
+
