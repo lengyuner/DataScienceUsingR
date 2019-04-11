@@ -1,0 +1,64 @@
+
+
+
+#if (!require("leaflet")) install.packages("leaflet", repos="https://cran.cnr.berkeley.edu/", dependencies = TRUE)
+#if (!require("rgdal")) install.packages("rgdal", repos="https://cran.cnr.berkeley.edu/", dependencies = TRUE)
+#if (!require("rtweet")) install.packages("rtweet", repos="https://cran.cnr.berkeley.edu/", dependencies = TRUE)
+#if (!require("htmlwidgets")) install.packages("htmlwidgets", repos="https://cran.cnr.berkeley.edu/", dependencies = TRUE)
+
+require("htmlwidgets")
+require("leaflet")
+require("rgdal")
+require("rtweet")
+
+install.packages("htmlwidgets")
+library(htmlwidgets)
+
+install.packages("leaflet")
+library(leaflet)
+
+install.packages("rgdal")
+
+library(rgdal)
+
+install.packages("rtweet")
+
+library(rtweet)
+
+
+
+setwd('C:/R0317')
+getwd()
+
+
+GDP<-read.csv('GDP growth.csv',encoding = "UTF-8")
+
+#districts <- readOGR("./ne_50m_admin_0_countries/ne_50m_admin_0_countries.shp",layer = "ne_50m_admin_0_countries", 
+ # GDAL1_integer64_policy = TRUE,TM_WORLD_BORDERS-0.3.shp
+
+districts <- readOGR("TM.shp",GDAL1_integer64_policy = TRUE,layer = "Hong_Kong_18_Districts", GDAL1_integer64_policy = TRUE)
+
+districts
+
+pop <- read.csv("district_pop.csv")
+
+pop
+fix(GDP)
+districts$ENAME
+
+districts$GDP <- GDP$X2015..YR2015.[match(as.character(districts$ENAME),GDP$Country.Code)]
+#districts$pop <- GDP$percentage[match(as.character(districts$ENAME),pop$district)]
+
+m <- leaflet()
+m <- addTiles(m)
+pal <- colorNumeric(palette="Greens",domain=districts$pop)
+m <- addPolygons(m,data=districts,weight = 1,popup=~ENAME,color = ~pal(districts$pop))
+m <- addLegend(m, "bottomright", pal = pal, values = districts$pop, title = "GDP growth %", labFormat = labelFormat(suffix = "%"), opacity = 0.75)
+
+
+m
+
+
+
+
+
