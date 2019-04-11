@@ -1,0 +1,85 @@
+
+# set the work space
+getwd()
+setwd('C:/R')
+rm(list = ls())
+getwd()
+
+# read the data
+library(readxl)
+FoldersNames1 <- read_excel("k_series.xlsx")
+FoldersNames2 <- read_excel("segregants.xlsx")
+
+# blind the folders name
+FoldersNames<-c(FoldersNames1$name,FoldersNames2$name)
+FoldersNames
+
+
+
+# the properties wanted
+A0 <- c("A7-1", "A7-2", "A8-1", "A8-2", "A9","C11-1", "C11-2", "C12-1", "C12-2", "C13","D14-1", "D14-2", "D14-3", "D15-1", "D15-2", "D15-3",
+        "D16-1", "D16-2", "D16-3", "D17-1", "D17-2", "D17-3")
+
+
+# change the colname
+Actin<- chartr("-",".", A0)
+Actin
+
+
+# using cycle
+library(stringr) # import the package to handle strings
+temp <- NULL
+rm(FINAL)
+FINAL<-NULL
+t=0;
+for(i in FoldersNames)
+{       
+  temp <- read.delim(i,header = TRUE)
+  cn<-colnames(temp)
+  cn1<-strsplit(cn,split ='_')
+  for(k0 in 1:length(colnames(temp)))
+  {
+    
+    colnames(temp)[k0]<-cn1[[k0]][1]
+  }
+  t=t+1
+  if(t<4){print(colnames(temp))}
+  
+  for(j in Actin)
+  {
+    k=0;        
+    if(j %in% colnames(temp))
+    {
+      k<-which(colnames(temp)==j)
+      temp1<-str_c(temp[,k],collapse=',')
+      k1<-which(FoldersNames==i)
+      k2<-which(Actin==j)
+      k3<-k1*length(Actin)+k2;
+      FINAL[k3]<-temp1
+    }        
+  }
+}
+
+FINAL
+FINAL1<-matrix(FINAL,nrow=length(FoldersNames),ncol=length(Actin),byrow=TRUE,dimnames=list(FoldersNames,Actin))
+fix(FINAL1)
+write.table (FINAL1, file ="fianl123456.csv",sep =",")
+
+
+
+
+
+
+
+
+final2<-read.csv('fianl1.csv')
+final3<-final2[1:9200,]
+final3[9199,]
+final3[9197,]
+final4<-final3[1:9197,]
+fix(final4)
+
+fianl
+
+
+
